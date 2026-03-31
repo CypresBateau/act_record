@@ -1,0 +1,48 @@
+server {
+    listen 80;
+    server_name your_server_ip_or_domain;  # 修改为你的服务器IP或域名
+
+    # 前端静态文件
+    location / {
+        root /home/ubuntu/act_record/client/build;  # 修改为实际路径
+        try_files $uri $uri/ /index.html;
+        index index.html;
+    }
+
+    # API代理到后端
+    location /api {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_cache_bypass $http_upgrade;
+
+        # 增加超时时间
+        proxy_connect_timeout 60s;
+        proxy_send_timeout 60s;
+        proxy_read_timeout 60s;
+    }
+
+    # 文件上传目录
+    location /uploads {
+        alias /home/ubuntu/act_record/uploads;  # 修改为实际路径
+        autoindex off;
+    }
+
+    # 限制文件上传大小
+    client_max_body_size 10M;
+
+    # Gzip压缩
+    gzip on;
+    gzip_vary on;
+    gzip_min_length 1024;
+    gzip_types text/plain text/css text/xml text/javascript application/x-javascript application/xml+rss application/json;
+
+    # 日志
+    access_log /var/log/nginx/act_record_access.log;
+    error_log /var/log/nginx/act_record_error.log;
+}

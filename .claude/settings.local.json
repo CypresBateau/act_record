@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(npm create:*)",
+      "Read(//e/03_envir/MongoDB/**)",
+      "Bash(powershell:*)",
+      "Bash(node:*)",
+      "Bash(curl -X POST http://localhost:5000/api/auth/login -H \"Content-Type: application/json\" -d \"{\"\"username\"\":\"\"admin\"\",\"\"password\"\":\"\"admin123\"\"}\" -s)",
+      "Bash(npm start)",
+      "Bash(npm run seed:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
