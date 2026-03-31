@@ -36,14 +36,9 @@ const CreateActivityPage = () => {
   const queryClient = useQueryClient();
   const [error, setError] = useState('');
 
-  // 等待权限加载完成 - 必须在任何使用 permissions 之前检查
-  if (!user || !permissions.departments || permissions.departments.length === 0) {
-    return <LoadingScreen />;
-  }
-
   const availableDepartments = permissions.canEditAll
     ? DEPARTMENTS
-    : permissions.departments;
+    : permissions.departments || [];
 
   const { register, handleSubmit, control, watch, formState: { errors } } = useForm({
     defaultValues: {
@@ -74,6 +69,11 @@ const CreateActivityPage = () => {
       setLoading(false);
     }
   });
+
+  // 等待权限加载完成
+  if (!user || !permissions.departments || permissions.departments.length === 0) {
+    return <LoadingScreen />;
+  }
 
   const onSubmit = (data) => {
     setError('');
