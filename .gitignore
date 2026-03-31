@@ -75,7 +75,7 @@ dist
 
 # Gatsby files
 .cache/
-public
+# public  # removed: conflicts with client/public (React static assets)
 
 # Storybook build outputs
 .out
