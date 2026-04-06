@@ -2,6 +2,9 @@
 node_modules/
 client/node_modules/
 
+# Tools
+tools/
+
 # Production builds
 client/build/
 client/dist/

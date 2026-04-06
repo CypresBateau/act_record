@@ -25,7 +25,7 @@ router.post('/', auth, requireAdmin, async (req, res) => {
       password,
       name,
       role,
-      department,
+      department: department || undefined,
       email,
       phone,
       isActive: true
@@ -67,10 +67,16 @@ router.get('/', auth, requireAdmin, async (req, res) => {
       query.role = role;
     }
 
-    // isActive筛选
-    if (isActive !== undefined && isActive !== '') {
-      query.isActive = isActive === 'true';
-      console.log('设置 isActive 筛选:', query.isActive);
+    // status/isActive筛选
+    if (req.query.status) {
+      query.status = req.query.status;
+    } else if (isActive !== undefined && isActive !== '') {
+      if (isActive === 'true') {
+        query.status = 'active';
+      } else {
+        query.status = { $in: ['pending', 'disabled'] };
+      }
+      console.log('设置 status 筛选:', query.status);
     }
 
     if (search) {
@@ -241,7 +247,8 @@ router.put('/:id/reset-password', auth, requireAdmin, async (req, res) => {
 router.get('/stats/overview', auth, requireAdmin, async (req, res) => {
   try {
     const totalUsers = await User.countDocuments();
-    const activeUsers = await User.countDocuments({ isActive: true });
+    const activeUsers = await User.countDocuments({ status: 'active' });
+    const pendingUsers = await User.countDocuments({ status: 'pending' });
 
     const usersByRole = await User.aggregate([
       { $group: { _id: '$role', count: { $sum: 1 } } }
@@ -255,7 +262,8 @@ router.get('/stats/overview', auth, requireAdmin, async (req, res) => {
     res.json({
       totalUsers,
       activeUsers,
-      inactiveUsers: totalUsers - activeUsers,
+      pendingUsers,
+      inactiveUsers: totalUsers - activeUsers - pendingUsers,
       usersByRole,
       usersByDepartment
     });

@@ -65,7 +65,7 @@ const LoginPage = () => {
         <Card sx={{ mt: 3, width: '100%' }}>
           <CardContent sx={{ p: 4 }}>
             {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
+              <Alert severity={error.includes('审核中') ? 'warning' : 'error'} sx={{ mb: 2 }}>
                 {error}
               </Alert>
             )}
@@ -73,14 +73,14 @@ const LoginPage = () => {
             <Box component="form" onSubmit={handleSubmit(onSubmit)}>
               <TextField
                 {...register('username', {
-                  required: '请输入用户名',
-                  minLength: { value: 3, message: '用户名至少3个字符' }
+                  required: '请输入学号',
+                  minLength: { value: 3, message: '学号至少3个字符' }
                 })}
                 margin="normal"
                 required
                 fullWidth
                 id="username"
-                label="用户名"
+                label="学号"
                 autoComplete="username"
                 autoFocus
                 error={!!errors.username}

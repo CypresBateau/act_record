@@ -44,9 +44,10 @@ const userSchema = new mongoose.Schema({
     trim: true,
     match: [/^1[3-9]\d{9}$/, '请输入有效的手机号码']
   },
-  isActive: {
-    type: Boolean,
-    default: true
+  status: {
+    type: String,
+    enum: ['pending', 'active', 'disabled'],
+    default: 'pending'
   },
   lastLogin: {
     type: Date
@@ -86,11 +87,20 @@ userSchema.methods.getPermissions = function() {
   return permissions;
 };
 
-// 隐藏密码字段
+// 隐藏密码字段，暴露 virtual 字段
 userSchema.methods.toJSON = function() {
-  const user = this.toObject();
+  const user = this.toObject({ virtuals: true });
   delete user.password;
   return user;
 };
+
+// isActive virtual（兼容现有代码）
+userSchema.virtual('isActive')
+  .get(function() {
+    return this.status === 'active';
+  })
+  .set(function(val) {
+    this.status = val ? 'active' : 'disabled';
+  });
 
 module.exports = mongoose.model('User', userSchema);

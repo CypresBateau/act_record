@@ -51,22 +51,8 @@ router.post('/register', async (req, res) => {
 
     await user.save();
 
-    // 生成JWT令牌
-    const token = generateToken(user._id);
-
     res.status(201).json({
-      message: '注册成功',
-      token,
-      user: {
-        id: user._id,
-        username: user.username,
-        name: user.name,
-        role: user.role,
-        department: user.department,
-        email: user.email,
-        phone: user.phone,
-        permissions: user.getPermissions()
-      }
+      message: '注册成功，请等待管理员审核'
     });
   } catch (error) {
     console.error('Registration error:', error);
@@ -95,8 +81,11 @@ router.post('/login', async (req, res) => {
       return res.status(400).json({ message: '用户名或密码错误' });
     }
 
-    // 检查账户是否被禁用
-    if (!user.isActive) {
+    // 检查账户状态（无 status 字段的老数据视为 active）
+    if (user.status === 'pending') {
+      return res.status(400).json({ message: '账号审核中，请联系管理员' });
+    }
+    if (user.status === 'disabled') {
       return res.status(400).json({ message: '账户已被禁用，请联系管理员' });
     }
 

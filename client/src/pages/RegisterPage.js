@@ -29,6 +29,7 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
 
   const { register, handleSubmit, control, watch, formState: { errors } } = useForm();
   const watchRole = watch('role');
@@ -40,7 +41,7 @@ const RegisterPage = () => {
     const result = await registerUser(data);
 
     if (result.success) {
-      navigate('/dashboard');
+      setSuccessMessage(result.message);
     } else {
       setError(result.message);
     }
@@ -74,6 +75,17 @@ const RegisterPage = () => {
             {error && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 {error}
+              </Alert>
+            )}
+
+            {successMessage && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {successMessage}
+                <Box mt={1}>
+                  <Link component="button" variant="body2" onClick={() => navigate('/login')}>
+                    前往登录页
+                  </Link>
+                </Box>
               </Alert>
             )}
 
@@ -128,16 +140,16 @@ const RegisterPage = () => {
               />
 
               <FormControl fullWidth margin="normal" required error={!!errors.role}>
-                <InputLabel id="role-label">角色</InputLabel>
+                <InputLabel id="role-label">职务</InputLabel>
                 <Controller
                   name="role"
                   control={control}
-                  rules={{ required: '请选择角色' }}
+                  rules={{ required: '请选择职务' }}
                   render={({ field }) => (
                     <Select
                       {...field}
                       labelId="role-label"
-                      label="角色"
+                      label="职务"
                     >
                       {ROLES.map((role) => (
                         <MenuItem key={role} value={role}>

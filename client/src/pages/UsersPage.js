@@ -26,7 +26,10 @@ import {
   DialogContent,
   DialogActions,
   Switch,
-  FormControlLabel
+  FormControlLabel,
+  ToggleButton,
+  ToggleButtonGroup,
+  Badge
 } from '@mui/material';
 import {
   Add,
@@ -56,6 +59,7 @@ const UsersPage = () => {
   const [department, setDepartment] = useState('');
   const [role, setRole] = useState('');
   const [showActiveOnly, setShowActiveOnly] = useState(true); // 默认只显示活跃用户
+  const [filterStatus, setFilterStatus] = useState('active'); // 'active' | 'pending' | 'all'
   const [resetPasswordDialogOpen, setResetPasswordDialogOpen] = useState(false);
   const [createUserDialogOpen, setCreateUserDialogOpen] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
@@ -77,14 +81,15 @@ const UsersPage = () => {
     ...(search && { search }),
     ...(department && { department }),
     ...(role && { role }),
-    ...(showActiveOnly && { isActive: 'true' }) // 传递字符串
+    ...(filterStatus === 'active' && { isActive: 'true' }),
+    ...(filterStatus === 'pending' && { status: 'pending' }),
   };
 
   // 调试日志
-  console.log('查询参数:', queryParams, 'showActiveOnly:', showActiveOnly);
+  console.log('查询参数:', queryParams, 'filterStatus:', filterStatus);
 
   const { data: usersData, isLoading } = useQuery(
-    ['users', user?.id, page + 1, rowsPerPage, search, department, role, showActiveOnly],
+    ['users', user?.id, page + 1, rowsPerPage, search, department, role, filterStatus],
     () => userService.getUsers(queryParams),
     {
       keepPreviousData: true,
@@ -264,10 +269,10 @@ const UsersPage = () => {
             </Grid>
             <Grid item xs={12} md={2}>
               <FormControl fullWidth size="small">
-                <InputLabel>角色</InputLabel>
+                <InputLabel>职务</InputLabel>
                 <Select
                   value={role}
-                  label="角色"
+                  label="职务"
                   onChange={(e) => setRole(e.target.value)}
                 >
                   <MenuItem value="">全部</MenuItem>
@@ -277,17 +282,19 @@ const UsersPage = () => {
                 </Select>
               </FormControl>
             </Grid>
-            <Grid item xs={12} md={2}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={showActiveOnly}
-                    onChange={(e) => setShowActiveOnly(e.target.checked)}
-                    color="primary"
-                  />
-                }
-                label="仅显示活跃用户"
-              />
+            <Grid item xs={12} md={4}>
+              <ToggleButtonGroup
+                value={filterStatus}
+                exclusive
+                onChange={(e, v) => v && setFilterStatus(v)}
+                size="small"
+              >
+                <ToggleButton value="active">活跃用户</ToggleButton>
+                <ToggleButton value="pending">
+                  待审核
+                </ToggleButton>
+                <ToggleButton value="all">全部</ToggleButton>
+              </ToggleButtonGroup>
             </Grid>
             <Grid item xs={12} md={2}>
               <Button
@@ -297,7 +304,7 @@ const UsersPage = () => {
                   setSearch('');
                   setDepartment('');
                   setRole('');
-                  setShowActiveOnly(true);
+                  setFilterStatus('active');
                 }}
               >
                 清除筛选
@@ -313,7 +320,7 @@ const UsersPage = () => {
             <TableRow>
               <TableCell>用户名</TableCell>
               <TableCell>姓名</TableCell>
-              <TableCell>角色</TableCell>
+              <TableCell>职务</TableCell>
               <TableCell>部门</TableCell>
               <TableCell>邮箱</TableCell>
               <TableCell>手机</TableCell>
@@ -338,16 +345,30 @@ const UsersPage = () => {
                 <TableCell>{user.email || '-'}</TableCell>
                 <TableCell>{user.phone || '-'}</TableCell>
                 <TableCell>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={user.isActive}
-                        onChange={() => handleToggleActive(user._id)}
+                  {user.status === 'pending' ? (
+                    <Box display="flex" alignItems="center" gap={1}>
+                      <Chip size="small" label="待审核" color="warning" />
+                      <Button
                         size="small"
-                      />
-                    }
-                    label={user.isActive ? '启用' : '禁用'}
-                  />
+                        variant="outlined"
+                        color="success"
+                        onClick={() => handleToggleActive(user._id)}
+                      >
+                        通过审核
+                      </Button>
+                    </Box>
+                  ) : (
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={user.isActive}
+                          onChange={() => handleToggleActive(user._id)}
+                          size="small"
+                        />
+                      }
+                      label={user.isActive ? '启用' : '禁用'}
+                    />
+                  )}
                 </TableCell>
                 <TableCell>
                   {user.lastLogin
@@ -465,10 +486,10 @@ const UsersPage = () => {
             </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth required>
-                <InputLabel>角色</InputLabel>
+                <InputLabel>职务</InputLabel>
                 <Select
                   value={newUser.role}
-                  label="角色"
+                  label="职务"
                   onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
                 >
                   {ROLES.map((role) => (

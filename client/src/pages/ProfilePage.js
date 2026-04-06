@@ -211,10 +211,10 @@ const ProfilePage = () => {
                   <Grid item xs={12} md={6}>
                     <TextField
                       fullWidth
-                      label="角色"
+                      label="职务"
                       value={user?.role}
                       disabled
-                      helperText="角色由管理员设置"
+                      helperText="职务由管理员设置"
                     />
                   </Grid>
                   <Grid item xs={12} md={6}>
