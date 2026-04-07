@@ -86,6 +86,7 @@ const ActivitiesPage = () => {
       queryClient.invalidateQueries('activities');
       setDeleteDialogOpen(false);
       setSelectedActivity(null);
+      setAnchorEl(null);
     },
     onSettled: () => {
       setLoading(false);
@@ -111,7 +112,6 @@ const ActivitiesPage = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    setSelectedActivity(null);
   };
 
   const handleDelete = () => {
@@ -341,14 +341,14 @@ const ActivitiesPage = () => {
 
       <Dialog
         open={deleteDialogOpen}
-        onClose={() => setDeleteDialogOpen(false)}
+        onClose={() => { setDeleteDialogOpen(false); setSelectedActivity(null); }}
       >
         <DialogTitle>确认删除</DialogTitle>
         <DialogContent>
           确定要删除活动 "{selectedActivity?.title}" 吗？此操作不可撤销。
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setDeleteDialogOpen(false)}>
+          <Button onClick={() => { setDeleteDialogOpen(false); setSelectedActivity(null); }}>
             取消
           </Button>
           <Button
